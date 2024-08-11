@@ -51,7 +51,7 @@ typedef struct tagLIST {
 	union {
 		HCUSTOMMODULE module;
 		LPCWSTR wname;
-	}
+	};
 	LPCSTR name;
 	struct tagLIST *next;
 	struct tagLIST *prev;
@@ -62,7 +62,7 @@ typedef struct tagLIST {
 		DWORD refcount;
 #endif
 		void *userdata;
-	}
+	};
 } LIST;
 
 static LIST *libraries;
