@@ -3,7 +3,11 @@
 //#define NTDDI_VERSION 0x05020000
 
 #include <windows.h>
-#include "Python-dynload.h"
+#ifdef STANDALONE
+#   include <Python.h>
+#else
+#   include "Python-dynload.h"
+#endif
 
 #include "hookiat.h"
 #include "MyLoadLibrary.h"
@@ -22,8 +26,8 @@ static char set_context_doc[] =
 "    dependency_module_data = finder(dependency_name)";
 
 
-#if (PY_VERSION_HEX < 0x03030000)
-# error "Python 3.0, 3.1, and 3.2 are not supported"
+#if (PY_VERSION_HEX < 0x03040000)
+#   error "Python 3.0 - 3.3 are not supported"
 #endif
 
 

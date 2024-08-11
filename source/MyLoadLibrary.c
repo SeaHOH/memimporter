@@ -1,5 +1,9 @@
 #include <windows.h>
-#include "Python-dynload.h"
+#ifdef STANDALONE
+#   include <Python.h>
+#else
+#   include "Python-dynload.h"
+#endif
 
 #include "MemoryModule.h"
 #include "MyLoadLibrary.h"
@@ -187,13 +191,13 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		// which encapsulates the dance we have to do.
 		PyObject *res = PyObject_CallFunction(findproc, "s", filename);
 		//PyObject *res = CallFindproc(findproc, filename);
-		if (res) {
-			size_t size = PyBytes_GET_SIZE(res);
-			if (size)
-				result = MemoryLoadLibraryEx(PyBytes_AsString(res), size,
-					MemoryDefaultAlloc, MemoryDefaultFree,
-					_LoadLibrary, _GetProcAddress, _FreeLibrary,
-					userdata);
+		char *data;
+		size_t size;
+		if (PyBytes_AsStringAndSize(res, &data, &size) == 0) {
+			result = MemoryLoadLibraryEx(data, size,
+				MemoryDefaultAlloc, MemoryDefaultFree,
+				_LoadLibrary, _GetProcAddress, _FreeLibrary,
+				userdata);
 			Py_DECREF(res);
 			if (result) {
 				lib = _AddMemoryModule(filename, result);
@@ -206,6 +210,8 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 					filename, userdata, GetLastError());
 			}
 		} else {
+			if (data)
+				Py_DECREF(res);
 			PyErr_Clear();
 		}
 	}

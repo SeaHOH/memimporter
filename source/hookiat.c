@@ -2,7 +2,7 @@
 #include "hookiat.h"
 
 
-/* src/Python/dynload_win.c GetPythonImport */
+/* PYTHON_SOURCE/Python/dynload_win.c GetPythonImport */
 
 IATHookInfo *
 HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,

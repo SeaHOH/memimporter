@@ -28,6 +28,7 @@ from setuptools.extension import Extension
 
 macros = [
     ("_CRT_SECURE_NO_WARNINGS", "1"),
+    ("Py_LIMITED_API", "0x03060000"),
     ("STANDALONE", "1")
 ]
 
@@ -57,10 +58,8 @@ _memimporter = Extension(
 )
 
 if __name__ == "__main__":
-    import fixupver
-    import patchheader
+    from tools import fixupver
     fixupver.fix_up("memimport.py")
-    patchheader.patch()
 
     setup(
         name="memimport",
@@ -111,5 +110,3 @@ if __name__ == "__main__":
         ext_modules=[_memimporter],
         py_modules=["memimport", "zipextimporter"],
     )
-
-    patchheader.unpatch()
