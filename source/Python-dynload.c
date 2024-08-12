@@ -22,7 +22,6 @@
 
 #define PYTHON_DYNLOAD_C
 #include "Python-dynload.h"
-#include "Python-dynload-func.h"
 #undef PYTHON_DYNLOAD_C
 
 /*
@@ -145,6 +144,8 @@ InitExports(void)
     if (!hPyCore)
         LoadPyCore();
 
+#if defined(DYNLOAD_CORE) || !defined(STANDALONE)
+
     /* Non-pointer variables START */
     IMPORT_DATA(Py_OptimizeFlag);
     /* Non-pointer variables END */
@@ -163,6 +164,8 @@ InitExports(void)
     IMPORT_FUNC(PyObject_CallFunction);
     IMPORT_FUNC(PyUnicode_AsWideCharString);
     /* Functions END */
+
+#endif
 }
 
 #ifdef GetProcAddress
