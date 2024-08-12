@@ -299,13 +299,15 @@ extern WORD Py_Minor_Version;
 /* Insert a MemoryModule into the linked list of loaded modules */
 void SetHookContext(LPCSTR name, void *userdata)
 {
+	PyObject *wname = PyUnicode_FromString(name);
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
-	entry->wname = _wcsdup(PyUnicode_AsWideCharString(name, NULL));
+	entry->wname = _wcsdup(PyUnicode_AsWideCharString(wname, NULL));
 	entry->name = _strdup(name);
 	entry->next = hookcontexts;
 	entry->prev = NULL;
 	entry->userdata = userdata;
 	hookcontexts = entry;
+	Py_DECREF(wname);
 }
 
 static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)

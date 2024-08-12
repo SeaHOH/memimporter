@@ -163,6 +163,7 @@ InitExports(void)
     IMPORT_FUNC(PyModule_Create2);
     IMPORT_FUNC(PyObject_CallFunction);
     IMPORT_FUNC(PyUnicode_AsWideCharString);
+    IMPORT_FUNC(PyUnicode_FromString);
     /* Functions END */
 
 #endif
