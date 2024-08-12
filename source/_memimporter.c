@@ -43,7 +43,7 @@ set_context(PyObject *self, PyObject *args)
         return NULL;
     }
     SetHookContext(pathname, (void *)findproc);
-    return NULL;
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef methods[] = {
