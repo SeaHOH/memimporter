@@ -16,7 +16,7 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
     IATHookInfo *hookinfo = (IATHookInfo *)malloc(sizeof(IATHookInfo));
     hookinfo->FunctionAddress = 0;
     hookinfo->OriginalFunction = 0;
-    hookinfo->FunctionHook = (DWORD)func_hook;
+    hookinfo->FunctionHook = (FARPROC)func_hook;
 
     /* Safety check input */
     if (hModule == NULL){
@@ -81,14 +81,14 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                     if (!IMAGE_SNAP_BY_ORDINAL(*pINT)) {
                         if (strcmp(dllbase + *pINT + 2, func_name) == 0) {
                             /* Found the import function then hook it */
-                            hookinfo->FunctionAddress = pIAT;
-                            hookinfo->OriginalFunction = *pIAT;
-                            *pIAT = hookinfo->FunctionHook;
+                            hookinfo->FunctionAddress = (FARPROC *)pIAT;
+                            hookinfo->OriginalFunction = *(FARPROC *)pIAT;
+                            *(FARPROC *)pIAT = hookinfo->FunctionHook;
                             goto finally;
                         }
                     }
-                    pINT++;
-                    pIAT++;
+                    pINT += 4;
+                    pIAT += 4;
                 }
             }
             import_data += 20;

@@ -5,9 +5,9 @@
 #define WORD_AT(mem)  (*(WORD *)(mem))
 
 typedef struct {
-    PDWORD FunctionAddress;
-    DWORD OriginalFunction;
-    DWORD FunctionHook;
+    FARPROC *FunctionAddress;
+    FARPROC OriginalFunction;
+    FARPROC FunctionHook;
 } IATHookInfo;
 
 IATHookInfo *HookImportAddressTable(LPCWSTR, HMODULE, LPCSTR, LPCSTR, void *);

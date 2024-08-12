@@ -3,11 +3,7 @@
 //#define NTDDI_VERSION 0x05020000
 
 #include <windows.h>
-#ifdef STANDALONE
-#   include <Python.h>
-#else
-#   include "Python-dynload.h"
-#endif
+#include "Python-dynload.h"
 
 #include "hookiat.h"
 #include "MyLoadLibrary.h"
@@ -42,6 +38,12 @@ set_context(PyObject *self, PyObject *args)
     PyObject *findproc;
     if (!PyArg_ParseTuple(args, "sO:set_context", &pathname, &findproc))
         return NULL;
+    if (!PyCallable_Check(findproc)) {
+            PyErr_Format(PyExc_TypeError,
+                         "second argument must be callable, not '%s'",
+                         Py_TYPE(findproc)->tp_name);
+        return NULL;
+    }
     SetHookContext(pathname, (void *)findproc);
 }
 
@@ -65,9 +67,6 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC
 PyInit__memimporter(void)
 {
-    extern char PyCore[];
-    extern HMODULE hPyCore;
-
     LoadPyCore();
     if (hookinfo_LoadLibraryExW == NULL) {
         hookinfo_LoadLibraryExW = HookImportAddressTable(
@@ -92,5 +91,8 @@ PyInit__memimporter(void)
             UnHookImportAddressTable(hookinfo_FreeLibrary);
         }
     }
+#if defined(DYNLOAD_CORE) || !defined(STANDALONE)
+    InitExports();
+#endif
     return PyModule_Create(&moduledef);
 }

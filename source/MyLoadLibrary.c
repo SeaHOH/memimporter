@@ -1,9 +1,5 @@
 #include <windows.h>
-#ifdef STANDALONE
-#   include <Python.h>
-#else
-#   include "Python-dynload.h"
-#endif
+#include "Python-dynload.h"
 
 #include "MemoryModule.h"
 #include "MyLoadLibrary.h"
@@ -56,11 +52,7 @@ typedef struct tagLIST {
 	struct tagLIST *next;
 	struct tagLIST *prev;
 	union {
-#ifdef _WIN64
-		DWORD64 refcount;
-#else
 		DWORD refcount;
-#endif
 		void *userdata;
 	};
 } LIST;
@@ -133,6 +125,8 @@ static LIST *_AddMemoryModule(LPCSTR name, HCUSTOMMODULE module)
  */
 static void _DelListEntry(LIST *entry)
 {
+	if (entry == NULL)
+		return;
 	if (entry->prev)
 		entry->prev->next = entry->next;
 	if (entry->next)
@@ -302,7 +296,7 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 extern WORD Py_Minor_Version;
 
 /* Insert a MemoryModule into the linked list of loaded modules */
-LIST *SetHookContext(LPCSTR name, void *userdata)
+void SetHookContext(LPCSTR name, void *userdata)
 {
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
 	entry->wname = PyUnicode_AsWideCharString(name, NULL);
@@ -311,7 +305,6 @@ LIST *SetHookContext(LPCSTR name, void *userdata)
 	entry->prev = NULL;
 	entry->userdata = userdata;
 	hookcontexts = entry;
-	return entry;
 }
 
 static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)

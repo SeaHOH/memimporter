@@ -28,7 +28,7 @@ from setuptools.extension import Extension
 
 macros = [
     ("_CRT_SECURE_NO_WARNINGS", "1"),
-    ("Py_LIMITED_API", "0x03060000"),
+    #("DYNLOAD_CORE", "1"),
     ("STANDALONE", "1")
 ]
 
