@@ -159,7 +159,7 @@ InitExports(void)
     IMPORT_FUNC(PyBytes_AsStringAndSize);
     IMPORT_FUNC(PyCallable_Check);
     IMPORT_FUNC(PyErr_Clear);
-    IMPORT_FUNC(PyErr_Format);
+    IMPORT_FUNC(PyErr_SetString);
     IMPORT_FUNC(PyModule_Create2);
     IMPORT_FUNC(PyObject_CallFunction);
     IMPORT_FUNC(PyUnicode_AsWideCharString);

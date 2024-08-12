@@ -131,6 +131,7 @@ static void _DelListEntry(LIST *entry)
 		entry->prev->next = entry->next;
 	if (entry->next)
 		entry->next->prev = entry->prev;
+	free(entry->name);
 	free(entry);
 	entry = NULL;
 }
@@ -299,8 +300,8 @@ extern WORD Py_Minor_Version;
 void SetHookContext(LPCSTR name, void *userdata)
 {
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
-	entry->wname = PyUnicode_AsWideCharString(name, NULL);
-	entry->name = name;
+	entry->wname = _wcsdup(PyUnicode_AsWideCharString(name, NULL));
+	entry->name = _strdup(name);
 	entry->next = hookcontexts;
 	entry->prev = NULL;
 	entry->userdata = userdata;
@@ -326,6 +327,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 
 	if (context)
 		hmodule = MyLoadLibrary(context->name, NULL, 0, context->userdata);
+		free(context->wname);
 		if (hmodule)
 			goto finally;
 

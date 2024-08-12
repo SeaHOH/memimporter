@@ -39,9 +39,7 @@ set_context(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "sO:set_context", &pathname, &findproc))
         return NULL;
     if (!PyCallable_Check(findproc)) {
-            PyErr_Format(PyExc_TypeError,
-                         "second argument must be callable, not '%s'",
-                         Py_TYPE(findproc)->tp_name);
+        PyErr_SetString(PyExc_TypeError, "second argument must be callable");
         return NULL;
     }
     SetHookContext(pathname, (void *)findproc);
