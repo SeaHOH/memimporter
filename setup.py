@@ -84,7 +84,7 @@ if __name__ == "__main__":
         ],
         setup_requires=["wheel"],
         platforms="Windows",
-        python_requires=">=3.6, <=3.12",
+        python_requires=">=3.6, <3.13",
 
         classifiers=[
             "Development Status :: 4 - Beta",

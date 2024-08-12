@@ -31,7 +31,7 @@ IATHookInfo *hookinfo_LoadLibraryExW = NULL,
             *hookinfo_GetProcAddress = NULL,
             *hookinfo_FreeLibrary = NULL;
 
-static void
+static PyObject *
 set_context(PyObject *self, PyObject *args)
 {
     char *pathname;
@@ -43,6 +43,7 @@ set_context(PyObject *self, PyObject *args)
         return NULL;
     }
     SetHookContext(pathname, (void *)findproc);
+    return NULL;
 }
 
 static PyMethodDef methods[] = {
