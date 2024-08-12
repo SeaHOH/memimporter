@@ -46,9 +46,9 @@ BOOL WINAPI MyGetModuleHandleExW(DWORD, LPCWSTR, HMODULE *)
 typedef struct tagLIST {
 	union {
 		HCUSTOMMODULE module;
-		LPCWSTR wname;
+		LPWSTR wname;
 	};
-	LPCSTR name;
+	LPSTR name;
 	struct tagLIST *next;
 	struct tagLIST *prev;
 	union {
@@ -312,8 +312,8 @@ static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
 {
 	LIST *context = hookcontexts;
 	while (context) {
-		if ((name && 0 == _stricmp(name, context->name)) ||
-		   (wname && 0 == _wcsicmp(wname, context->wname)))
+		if ((name && 0 == strcmp(name, context->name)) ||
+		   (wname && 0 == wcscmp(wname, context->wname)))
 			return context;
 		context = context->next;
 	}

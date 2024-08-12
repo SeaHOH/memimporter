@@ -31,7 +31,7 @@ IATHookInfo *hookinfo_LoadLibraryExW = NULL,
             *hookinfo_GetProcAddress = NULL,
             *hookinfo_FreeLibrary = NULL;
 
-static PyObject *
+static void
 set_context(PyObject *self, PyObject *args)
 {
     char *pathname;

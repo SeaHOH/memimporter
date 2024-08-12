@@ -8,7 +8,8 @@ import sys
 import glob
 import platform
 
-from importlib import machinery
+import _imp
+_imp.extension_suffixes = lambda: ['.pyd']
 
 if sys.argv != ['setup.py', 'sdist']:
 
@@ -83,7 +84,7 @@ if __name__ == "__main__":
         ],
         setup_requires=["wheel"],
         platforms="Windows",
-        python_requires=">=3.6, <3.12",
+        python_requires=">=3.6, <=3.12",
 
         classifiers=[
             "Development Status :: 4 - Beta",
