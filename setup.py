@@ -42,11 +42,11 @@ extra_compile_args = [
 extra_link_args = []
 
 
-if 0:
+if 1:
     # enable this to debug a release build
     extra_compile_args.append("/Od")
     extra_compile_args.append("/Z7")
-    extra_link_args.append("/DEBUG")
+    #extra_link_args.append("/DEBUG")
     macros.append(("VERBOSE", "1"))
 
 _memimporter = Extension(

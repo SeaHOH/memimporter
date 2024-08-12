@@ -299,6 +299,7 @@ extern WORD Py_Minor_Version;
 /* Insert a MemoryModule into the linked list of loaded modules */
 void SetHookContext(LPCSTR name, void *userdata)
 {
+	dprintf("SetHookContext(%s, %p)\n", name, userdata);
 	PyObject *wname = PyUnicode_FromString(name);
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
 	entry->wname = _wcsdup(PyUnicode_AsWideCharString(wname, NULL));
@@ -308,6 +309,7 @@ void SetHookContext(LPCSTR name, void *userdata)
 	entry->userdata = userdata;
 	hookcontexts = entry;
 	Py_DECREF(wname);
+	dprintf("SetHookContext(%s, %p) -> NULL\n", name, userdata);
 }
 
 static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
@@ -315,8 +317,10 @@ static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
 	LIST *context = hookcontexts;
 	while (context) {
 		if ((name && 0 == strcmp(name, context->name)) ||
-		   (wname && 0 == wcscmp(wname, context->wname)))
+			(wname && 0 == wcscmp(wname, context->wname))) {
+			dprintf("_FindHookContext(%s, %s) -> %p %s\n", name, wname, context, name);
 			return context;
+		}
 		context = context->next;
 	}
 	return NULL;
@@ -324,16 +328,21 @@ static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
 
 HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 {
+	dprintf("LoadLibraryExWHook(%s, %d, %x)\n", lpLibFileName, hFile, dwFlags);
 	HMODULE hmodule;
 	LIST *context = _FindHookContext(NULL, lpLibFileName);
 
-	if (context)
+	if (context) {
 		hmodule = MyLoadLibrary(context->name, NULL, 0, context->userdata);
 		free(context->wname);
-		if (hmodule)
+		if (hmodule) {
+			dprintf("LoadLibraryExWHook(%s, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
+		}
+	}
 
 	hmodule = LoadLibraryExW(lpLibFileName, hFile, dwFlags);
+	dprintf("LoadLibraryExW(%s, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 
 finally:
 	_DelListEntry(context);
