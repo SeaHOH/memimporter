@@ -7,14 +7,26 @@
 
 /* PYTHON_SOURCE/Python/dynload_win.c GetPythonImport */
 
+#ifdef _WIN64
+/* PE32+ */
+#define OPT_MAGIC 0x20B
+#define NUM_DICT_OFF 108
+#define IMPORT_OFF 120
+#define THUNK_WALK 2
+#else
+/* PE32 */
+#define OPT_MAGIC 0x10B
+#define NUM_DICT_OFF 92
+#define IMPORT_OFF 104
+#define THUNK_WALK 1
+#endif
+
 IATHookInfo *
 HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                        LPCSTR module_name, LPCSTR func_name, void *func_hook)
 {
     unsigned char *dllbase, *import_data;
     DWORD pe_offset, opt_offset;
-    WORD opt_magic;
-    int num_dict_off, import_off;
     PDWORD pIAT, pINT;
     IATHookInfo *hookinfo = (IATHookInfo *)malloc(sizeof(IATHookInfo));
     hookinfo->FunctionAddress = 0;
@@ -53,28 +65,19 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
        within the dictionary pointing to the imports. */
 
     opt_offset = pe_offset + 4 + 20;
-    opt_magic = WORD_AT(dllbase + opt_offset);
-    if (opt_magic == 0x10B) {
-        /* PE32 */
-        num_dict_off = 92;
-        import_off   = 104;
-    } else if (opt_magic == 0x20B) {
-        /* PE32+ */
-        num_dict_off = 108;
-        import_off   = 120;
-    } else {
+    if (OPT_MAGIC != WORD_AT(dllbase + opt_offset)) {
         /* Unsupported */
         goto finally;
     }
 
     /* Now if an import table exists, walk the list of imports. */
 
-    if (DWORD_AT(dllbase + opt_offset + num_dict_off) >= 2) {
+    if (DWORD_AT(dllbase + opt_offset + NUM_DICT_OFF) >= 2) {
         /* We have at least 2 tables - the import table is the second
            one.  But still it may be that the table size is zero */
-        if (0 == DWORD_AT(dllbase + opt_offset + import_off + sizeof(DWORD)))
+        if (0 == DWORD_AT(dllbase + opt_offset + IMPORT_OFF + sizeof(DWORD)))
             goto finally;
-        import_data = dllbase + DWORD_AT(dllbase + opt_offset + import_off);
+        import_data = dllbase + DWORD_AT(dllbase + opt_offset + IMPORT_OFF);
         while (DWORD_AT(import_data)) {
             if (_stricmp(dllbase + DWORD_AT(import_data+12), module_name) == 0) {
 #ifdef VERBOSE
@@ -99,8 +102,8 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                             goto finally;
                         }
                     }
-                    pINT ++;
-                    pIAT ++;
+                    pINT += THUNK_WALK;
+                    pIAT += THUNK_WALK;
                 }
             }
             import_data += 20;
