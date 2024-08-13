@@ -75,7 +75,7 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
         while (DWORD_AT(import_data)) {
             if (_stricmp(dllbase + DWORD_AT(import_data+12), module_name) == 0) {
 #ifdef VERBOSE
-                printf("found %s\n", module_name)
+                printf("found %s\n", module_name);
 #endif
                 /* Found the import module */
                 pINT = (PDWORD)(dllbase + DWORD_AT(import_data));
@@ -84,7 +84,7 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                     if (!IMAGE_SNAP_BY_ORDINAL(*pINT)) {
                         if (_stricmp(dllbase + *pINT + 2, func_name) == 0) {
 #ifdef VERBOSE
-                            printf("found %s\n", func_name)
+                            printf("found %s\n", func_name);
 #endif
                             /* Found the import function then hook it */
                             hookinfo->FunctionAddress = (FARPROC *)pIAT;
