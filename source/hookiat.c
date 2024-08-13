@@ -98,7 +98,10 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                             /* Found the import function then hook it */
                             hookinfo->FunctionAddress = (FARPROC *)pIAT;
                             hookinfo->OriginalFunction = *(FARPROC *)pIAT;
+                            DWORD dwOldProtect;
+                            VirtualProtect(pIAT, sizeof(ULONG64), PAGE_EXECUTE_READWRITE, &dwOldProtect);
                             *(FARPROC *)pIAT = hookinfo->FunctionHook;
+                            VirtualProtect(pIAT, sizeof(ULONG64), dwOldProtect, &dwOldProtect);
                             goto finally;
                         }
                     }
