@@ -85,6 +85,9 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                 pIAT = (PDWORD)(dllbase + DWORD_AT(import_data+16));
                 while (*pINT) {
                     if (!IMAGE_SNAP_BY_ORDINAL(*pINT)) {
+#ifdef VERBOSE
+                            printf("walk %s\n", dllbase + *pINT + 2);
+#endif
                         if (_stricmp(dllbase + *pINT + 2, func_name) == 0) {
 #ifdef VERBOSE
                             printf("found %s\n", func_name);
