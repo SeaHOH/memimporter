@@ -1,5 +1,8 @@
 #include <windows.h>
 #include "hookiat.h"
+#ifdef VERBOSE
+#include <stdio.h>
+#endif
 
 
 /* PYTHON_SOURCE/Python/dynload_win.c GetPythonImport */
