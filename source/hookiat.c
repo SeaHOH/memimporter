@@ -99,8 +99,8 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
                             goto finally;
                         }
                     }
-                    pINT += 4;
-                    pIAT += 4;
+                    pINT += sizeof(IMAGE_THUNK_DATA);
+                    pIAT += sizeof(IMAGE_THUNK_DATA);
                 }
             }
             import_data += 20;
