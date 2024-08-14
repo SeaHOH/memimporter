@@ -179,6 +179,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 	if (userdata) {
 		dprintf("@userdata\n");
 		PyObject *findproc = (PyObject *)userdata;
+		dprintf("PyCallable_Check() -> %d", PyCallable_Check(findproc));
 		// Since we are using the Py_LIMITED_API with dynamic loading
 		// we would have to implement PyObject_CallFunction() ourselves,
 		// which would be a paint since there is no PyObject_VaCallFunction.
