@@ -15,6 +15,6 @@ FARPROC WINAPI GetProcAddressHook(HMODULE, LPCSTR);
 
 BOOL WINAPI FreeLibraryHook(HMODULE);
 
-void SetHookContext(LPCSTR, void *);
+void SetHookContext(LPCSTR, PyObject *);
 
 #endif

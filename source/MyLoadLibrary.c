@@ -306,7 +306,7 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 extern WORD Py_Minor_Version;
 
 /* Insert a MemoryModule into the linked list of loaded modules */
-void SetHookContext(LPCSTR name, void *userdata)
+void SetHookContext(LPCSTR name, PyObject *userdata)
 {
 	dprintf("SetHookContext(%s, %p)\n", name, userdata);
 	PyObject *wname = PyUnicode_FromString(name);
@@ -315,8 +315,9 @@ void SetHookContext(LPCSTR name, void *userdata)
 	entry->name = _strdup(name);
 	entry->next = hookcontexts;
 	entry->prev = NULL;
-	entry->userdata = userdata;
+	entry->userdata = (void *)userdata;
 	hookcontexts = entry;
+	Py_INCREF(userdata);
 	Py_DECREF(wname);
 	dprintf("SetHookContext(%s, %p) -> NULL\n", name, userdata);
 }
@@ -344,6 +345,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
 		free(context->wname);
+		Py_DECREF(userdata);
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
