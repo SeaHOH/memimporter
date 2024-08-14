@@ -43,9 +43,7 @@ set_context(PyObject *self, PyObject *args)
         return NULL;
     }
     SetHookContext(pathname, findproc);
-    void * vf = (void *)findproc;
-    PyObject *res = PyObject_CallFunction((PyObject *)vf, "s", pathname);
-    Py_DECREF(res);
+    printf("findproc data = [%x]", *findproc);
     Py_RETURN_NONE;
 }
 

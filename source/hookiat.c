@@ -28,6 +28,7 @@
 DWORD page_protect; \
 VirtualProtect((void *)addr, sizeof(type), PAGE_EXECUTE_READWRITE, &page_protect); \
 *(type *)addr = (type)data; \
+dprintf(#type " *" #addr "[pp=%x]", page_protect); \
 VirtualProtect((void *)addr, sizeof(type), page_protect, &page_protect)
 
 #define DWORD_AT(mem) (*(DWORD *)(mem))

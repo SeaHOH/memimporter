@@ -185,9 +185,8 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		//
 		// So we implement a special CallFindproc function
 		// which encapsulates the dance we have to do.
-		DWORD page_protect;
-		VirtualProtect(findproc, sizeof(PyObject), PAGE_EXECUTE_READWRITE, &page_protect);
-		dprintf("@userdata() pp=%x\n", page_protect);
+		dprintf("@userdata userdata data = [%x]", *userdata);
+		dprintf("@userdata findproc data = [%x]", *findproc);
 		//PyObject *res = PyObject_CallFunction(findproc, "s", filename);
 		PyObject *res = CallFindproc(findproc, filename);
 		dprintf("@userdata() -> %p\n", res);
