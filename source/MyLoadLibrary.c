@@ -345,7 +345,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
 		free(context->wname);
-		Py_DECREF(userdata);
+		Py_DECREF((PyObject *)context->userdata);
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
