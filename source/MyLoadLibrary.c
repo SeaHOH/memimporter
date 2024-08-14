@@ -177,6 +177,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		return lib->module;
 	}
 	if (userdata) {
+		dprintf("_LoadLibrary(%s, %p)@userdata\n", filename, userdata);
 		PyObject *findproc = (PyObject *)userdata;
 		// Since we are using the Py_LIMITED_API with dynamic loading
 		// we would have to implement PyObject_CallFunction() ourselves,
@@ -184,6 +185,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		//
 		// So we implement a special CallFindproc function
 		// which encapsulates the dance we have to do.
+		dprintf("_LoadLibrary(%s, %p)@userdata()\n", filename, userdata);
 		PyObject *res = PyObject_CallFunction(findproc, "s", filename);
 		//PyObject *res = CallFindproc(findproc, filename);
 		char *data;
@@ -318,7 +320,7 @@ static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
 	while (context) {
 		if ((name && 0 == strcmp(name, context->name)) ||
 			(wname && 0 == wcscmp(wname, context->wname))) {
-			dprintf("_FindHookContext(%s, %s) -> %p %s\n", name, wname, context, name);
+			dprintf("_FindHookContext(%s, %ls) -> %p %s\n", name, wname, context, context->name);
 			return context;
 		}
 		context = context->next;
@@ -328,21 +330,21 @@ static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
 
 HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 {
-	dprintf("LoadLibraryExWHook(%s, %d, %x)\n", lpLibFileName, hFile, dwFlags);
+	dprintf("LoadLibraryExWHook(%ls, %d, %x)\n", lpLibFileName, hFile, dwFlags);
 	HMODULE hmodule;
 	LIST *context = _FindHookContext(NULL, lpLibFileName);
 
 	if (context) {
-		hmodule = MyLoadLibrary(context->name, NULL, 0, context->userdata);
+		hmodule = _LoadLibrary(context->name, context->userdata);
 		free(context->wname);
 		if (hmodule) {
-			dprintf("LoadLibraryExWHook(%s, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
+			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
 		}
 	}
 
 	hmodule = LoadLibraryExW(lpLibFileName, hFile, dwFlags);
-	dprintf("LoadLibraryExW(%s, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
+	dprintf("LoadLibraryExW(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 
 finally:
 	_DelListEntry(context);

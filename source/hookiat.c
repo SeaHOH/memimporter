@@ -2,6 +2,9 @@
 #include "hookiat.h"
 #ifdef VERBOSE
 #include <stdio.h>
+#define dprintf(args) printf(args)
+#else
+#define dprintf(args)
 #endif
 
 
@@ -20,6 +23,15 @@
 #define IMPORT_OFF 104
 #define THUNK_WALK 1
 #endif
+
+#define WRITE_MEM(addr, type, data) \
+DWORD page_protect; \
+VirtualProtect((void *)addr, sizeof(type), PAGE_EXECUTE_READWRITE, &page_protect); \
+*(type *)addr = (type *)data; \
+VirtualProtect((void *)addr, sizeof(type), page_protect, &page_protect)
+
+#define DWORD_AT(mem) (*(DWORD *)(mem))
+#define WORD_AT(mem)  (*(WORD *)(mem))
 
 IATHookInfo *
 HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
@@ -80,28 +92,19 @@ HookImportAddressTable(LPCWSTR lpModuleName, HMODULE hModule,
         import_data = dllbase + DWORD_AT(dllbase + opt_offset + IMPORT_OFF);
         while (DWORD_AT(import_data)) {
             if (_stricmp(dllbase + DWORD_AT(import_data+12), module_name) == 0) {
-#ifdef VERBOSE
-                printf("found %s\n", module_name);
-#endif
+                dprintf("found %s\n", module_name);
                 /* Found the import module */
                 pINT = (PDWORD)(dllbase + DWORD_AT(import_data));
                 pIAT = (PDWORD)(dllbase + DWORD_AT(import_data+16));
                 while (*pINT) {
                     if (!IMAGE_SNAP_BY_ORDINAL(*pINT)) {
-#ifdef VERBOSE
-                            printf("walk %s\n", dllbase + *pINT + 2);
-#endif
+                            dprintf("walk %s\n", dllbase + *pINT + 2);
                         if (_stricmp(dllbase + *pINT + 2, func_name) == 0) {
-#ifdef VERBOSE
-                            printf("found %s\n", func_name);
-#endif
+                            dprintf("found %s\n", func_name);
                             /* Found the import function then hook it */
                             hookinfo->FunctionAddress = (FARPROC *)pIAT;
                             hookinfo->OriginalFunction = *(FARPROC *)pIAT;
-                            DWORD dwOldProtect;
-                            VirtualProtect(pIAT, sizeof(ULONG64), PAGE_EXECUTE_READWRITE, &dwOldProtect);
-                            *(FARPROC *)pIAT = hookinfo->FunctionHook;
-                            VirtualProtect(pIAT, sizeof(ULONG64), dwOldProtect, &dwOldProtect);
+                            WRITE_MEM(pIAT, FARPROC, hookinfo->FunctionHook);
                             goto finally;
                         }
                     }
@@ -121,7 +124,7 @@ void
 UnHookImportAddressTable(IATHookInfo *hookinfo)
 {
     if (IsHooked(hookinfo)) {
-        *hookinfo->FunctionAddress = hookinfo->OriginalFunction;
+        WRITE_MEM(hookinfo->FunctionAddress, FARPROC, hookinfo->OriginalFunction);
     }
 }
 

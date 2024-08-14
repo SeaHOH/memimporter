@@ -18,7 +18,6 @@
 */
 
 #include <windows.h>
-#include <stdio.h>
 
 #define PYTHON_DYNLOAD_C
 #include "Python-dynload.h"
@@ -34,13 +33,18 @@
   file system as well as loaded from memory.
 */
 #if defined(Py_BUILD_CORE) || !defined(STANDALONE)
-#   define GetProcAddress MyGetProcAddress
-#   include "MyLoadLibrary.h"
-#endif
-
+#include "MyLoadLibrary.h"
+#define GetProcAddress MyGetProcAddress
 #define IMPORT_FUNC(name) (FARPROC)name = GetProcAddress(hPyCore, #name)
 #define IMPORT_DATA(name) (FARPROC)name##_Ptr = GetProcAddress(hPyCore, #name)
 #define IMPORT_DATA_PTR(name) (void *)name = *((void **)GetProcAddress(hPyCore, #name))
+#endif
+
+#ifdef _DEBUG
+#define DEBUG_SUFFIX L"_d"
+#else
+#define DEBUG_SUFFIX L""
+#endif
 
 
 wchar_t PyCore[20];
@@ -51,11 +55,7 @@ WORD Py_Minor_Version = 0;
 static inline void
 _LoadPyCore(WORD py_minor_version)
 {
-#ifdef _DEBUG
-    swprintf(PyCore, sizeof(PyCore), L"python3%d_d.dll", py_minor_version);
-#else
-    swprintf(PyCore, sizeof(PyCore), L"python3%d.dll", py_minor_version);
-#endif
+    swprintf(PyCore, sizeof(PyCore), L"python3%d" DEBUG_SUFFIX L".dll", py_minor_version);
     hPyCore = GetModuleHandleW(PyCore);
 }
 
@@ -109,11 +109,7 @@ LoadPyCore(void)
         return;
     }
 
-#ifdef _DEBUG
-    LoadPyVersion(GetModuleHandleW(L"python3_d.dll"));
-#else
-    LoadPyVersion(GetModuleHandleW(L"python3.dll"));
-#endif
+    LoadPyVersion(GetModuleHandleW(L"python3" DEBUG_SUFFIX L".dll"));
     if (Py_Minor_Version) {
         _LoadPyCore(Py_Minor_Version);
         goto done;
