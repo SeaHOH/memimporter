@@ -42,7 +42,9 @@ set_context(PyObject *self, PyObject *args)
         PyErr_SetString(PyExc_TypeError, "second argument must be callable");
         return NULL;
     }
-    SetHookContext(pathname, (void *)findproc);
+    SetHookContext(pathname, findproc);
+    PyObject *res = PyObject_CallFunction(findproc, "s", pathname);
+    Py_DECREF(res);
     Py_RETURN_NONE;
 }
 
