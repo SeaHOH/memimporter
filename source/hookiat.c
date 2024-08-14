@@ -2,9 +2,9 @@
 #include "hookiat.h"
 #ifdef VERBOSE
 #include <stdio.h>
-#define dprintf(args) printf(args)
+#define dprintf(ftm, arg) printf(ftm, arg)
 #else
-#define dprintf(args)
+#define dprintf(ftm, arg)
 #endif
 
 
@@ -27,7 +27,7 @@
 #define WRITE_MEM(addr, type, data) \
 DWORD page_protect; \
 VirtualProtect((void *)addr, sizeof(type), PAGE_EXECUTE_READWRITE, &page_protect); \
-*(type *)addr = (type *)data; \
+*(type *)addr = (type)data; \
 VirtualProtect((void *)addr, sizeof(type), page_protect, &page_protect)
 
 #define DWORD_AT(mem) (*(DWORD *)(mem))

@@ -149,7 +149,7 @@ static void _FreeLibrary(HCUSTOMMODULE module, void *userdata)
 	MyFreeLibrary(module);
 }
 
-/*PyObject *CallFindproc(PyObject *findproc, LPCSTR filename)
+PyObject *CallFindproc(PyObject *findproc, LPCSTR filename)
 {
 	PyObject *res = NULL;
 	PyObject *args = PyTuple_New(1);
@@ -160,7 +160,7 @@ static void _FreeLibrary(HCUSTOMMODULE module, void *userdata)
 	res = PyObject_CallObject(findproc, args);
 	Py_DECREF(args);
 	return res;
-}*/
+}
 
 static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 {
@@ -177,7 +177,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		return lib->module;
 	}
 	if (userdata) {
-		dprintf("_LoadLibrary(%s, %p)@userdata\n", filename, userdata);
+		dprintf("@userdata\n");
 		PyObject *findproc = (PyObject *)userdata;
 		// Since we are using the Py_LIMITED_API with dynamic loading
 		// we would have to implement PyObject_CallFunction() ourselves,
@@ -185,9 +185,10 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		//
 		// So we implement a special CallFindproc function
 		// which encapsulates the dance we have to do.
-		dprintf("_LoadLibrary(%s, %p)@userdata()\n", filename, userdata);
-		PyObject *res = PyObject_CallFunction(findproc, "s", filename);
-		//PyObject *res = CallFindproc(findproc, filename);
+		dprintf("@userdata()\n");
+		//PyObject *res = PyObject_CallFunction(findproc, "s", filename);
+		PyObject *res = CallFindproc(findproc, filename);
+		dprintf("@userdata() -> %p\n", res);
 		char *data;
 		size_t size;
 		if (PyBytes_AsStringAndSize(res, &data, &size) == 0) {
