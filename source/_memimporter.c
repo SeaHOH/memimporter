@@ -43,7 +43,13 @@ set_context(PyObject *self, PyObject *args)
         return NULL;
     }
     SetHookContext(pathname, findproc);
-    printf("findproc data = [%x]", *findproc);
+    int i;
+    PDWORD pdata = (PDWORD)findproc;
+    dprintf("findproc data = \n");
+    for (i = 0; i < sizeof(PyObject); i += sizeof(DWORD)) {
+        dprintf("    %x\n", *pdata);
+        pdata ++;
+    }
     Py_RETURN_NONE;
 }
 

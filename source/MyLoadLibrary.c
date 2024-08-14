@@ -149,7 +149,7 @@ static void _FreeLibrary(HCUSTOMMODULE module, void *userdata)
 	MyFreeLibrary(module);
 }
 
-PyObject *CallFindproc(PyObject *findproc, LPCSTR filename)
+/*PyObject *CallFindproc(PyObject *findproc, LPCSTR filename)
 {
 	PyObject *res = NULL;
 	PyObject *args = PyTuple_New(1);
@@ -160,7 +160,7 @@ PyObject *CallFindproc(PyObject *findproc, LPCSTR filename)
 	res = PyObject_CallObject(findproc, args);
 	Py_DECREF(args);
 	return res;
-}
+}*/
 
 static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 {
@@ -185,10 +185,15 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		//
 		// So we implement a special CallFindproc function
 		// which encapsulates the dance we have to do.
-		dprintf("@userdata userdata data = [%x]", *userdata);
-		dprintf("@userdata findproc data = [%x]", *findproc);
-		//PyObject *res = PyObject_CallFunction(findproc, "s", filename);
-		PyObject *res = CallFindproc(findproc, filename);
+		int i;
+		PDWORD pdata = (PDWORD)userdata;
+		dprintf("@userdata data = \n");
+		for (i = 0; i < sizeof(PyObject); i += sizeof(DWORD)) {
+			dprintf("    %x\n", *pdata);
+			pdata ++;
+		}
+		PyObject *res = PyObject_CallFunction(findproc, "s", filename);
+		//PyObject *res = CallFindproc(findproc, filename);
 		dprintf("@userdata() -> %p\n", res);
 		char *data;
 		size_t size;
