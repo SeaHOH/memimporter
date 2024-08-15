@@ -322,6 +322,7 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 		if (proc == (FARPROC)&GetModuleHandleExW)
 			proc = (FARPROC)MyGetModuleHandleExW;
 	}
+	last_module = module;
 	return proc;
 }
 
