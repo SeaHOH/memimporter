@@ -302,8 +302,8 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 	else {
 		SetLastError(0);
 		proc = GetProcAddress(module, procname);
-		//if (proc == (FARPROC)&GetModuleHandleExW)
-		//	proc = (FARPROC)MyGetModuleHandleExW;
+		if (proc == (FARPROC)&GetModuleHandleExW)
+			proc = (FARPROC)MyGetModuleHandleExW;
 	}
 	return proc;
 }
@@ -325,7 +325,7 @@ void SetHookContext(LPCSTR name, PyObject *userdata)
 	entry->prev = NULL;
 	entry->userdata = (void *)userdata;
 	hookcontexts = entry;
-	Py_INCREF(userdata);
+	//Py_INCREF(userdata);
 	Py_DECREF(wname);
 	dprintf("SetHookContext(%s, %p) -> NULL\n", name, userdata);
 }
@@ -364,7 +364,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 	dprintf("LoadLibraryExW(%ls, %d, %x) -> %p\n", lpLibFileName, hFile, dwFlags, hmodule);
 
 finally:
-	//_DelListEntry(context);
+	_DelListEntry(context);
 	return hmodule;
 }
 
