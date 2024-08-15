@@ -295,6 +295,7 @@ BOOL WINAPI MyGetModuleHandleExW(DWORD flags, LPCWSTR modname, HMODULE *pmodule)
 FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 {
 	FARPROC proc;
+	dprintf("MyGetProcAddress(%p, %s)");
 	LIST *lib = _FindMemoryModule(NULL, module);
 	if (lib)
 		proc = MemoryGetProcAddress(lib->module, procname);
@@ -352,7 +353,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
 		free(context->wname);
-		Py_DECREF((PyObject *)(context->userdata));
+		//Py_DECREF((PyObject *)(context->userdata));
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
