@@ -2,7 +2,7 @@
 
 #ifdef PYTHON_DYNLOAD_C
 
-/* Define non-pointer variables via macros */
+/* Define functions */
 int (*PyArg_ParseTuple)(PyObject *, const char *, ...);
 
 #endif  // PYTHON_DYNLOAD_C

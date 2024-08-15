@@ -178,8 +178,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 	}
 	if (userdata) {
 		dprintf("@userdata\n");
-		PyObject *findproc = (PyObject *)userdata;
-		dprintf("PyCallable_Check() -> %d", PyCallable_Check(findproc));
+		//PyObject *findproc = (PyObject *)userdata;
 		// Since we are using the Py_LIMITED_API with dynamic loading
 		// we would have to implement PyObject_CallFunction() ourselves,
 		// which would be a paint since there is no PyObject_VaCallFunction.
@@ -189,16 +188,19 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		int i;
 		PDWORD pdata = (PDWORD)userdata;
 		dprintf("@userdata data = \n");
-		for (i = 0; i < sizeof(PyObject); i += sizeof(DWORD)) {
+		for (i = 0; i <= sizeof(PyObject); i += sizeof(DWORD)) {
 			dprintf("    %x\n", *pdata);
 			pdata ++;
 		}
-		PyObject *res = PyObject_CallFunction(findproc, "s", filename);
+		if (PyCallable_Check((PyObject *)userdata))
+			PyObject *res = PyObject_CallFunction((PyObject *)userdata, "s", filename);
+		else
+			PyObject *res = PyObject_CallMethod((PyObject *)userdata, "get_data", "s", filename);
 		//PyObject *res = CallFindproc(findproc, filename);
 		dprintf("@userdata() -> %p\n", res);
 		char *data;
 		size_t size;
-		if (PyBytes_AsStringAndSize(res, &data, &size) == 0) {
+		if (PyBytes_AsStringAndSize(res, &data, &size) == 0 && size) {
 			result = MemoryLoadLibraryEx(data, size,
 				MemoryDefaultAlloc, MemoryDefaultFree,
 				_LoadLibrary, _GetProcAddress, _FreeLibrary,
@@ -215,10 +217,10 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 					filename, userdata, GetLastError());
 			}
 		} else {
-			if (data)
-				Py_DECREF(res);
 			PyErr_Clear();
 		}
+		if (res)
+			Py_DECREF(res);
 	}
 	SetLastError(0);
 	result = (HCUSTOMMODULE)LoadLibraryA(filename);

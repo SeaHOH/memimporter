@@ -23,7 +23,7 @@
 
 #include <Python.h>
 
-#if defined(DYNLOAD_CORE) || !defined(STANDALONE)
+#if defined(DYNLOAD_CORE) || defined(Py_BUILD_CORE)
 
 #   ifdef PYTHON_DYNLOAD_C
 

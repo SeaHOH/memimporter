@@ -32,7 +32,7 @@
   loaded python DLL, so it will work both with the DLL loaded from the
   file system as well as loaded from memory.
 */
-#if defined(Py_BUILD_CORE) || !defined(STANDALONE)
+#if defined(Py_BUILD_CORE) || defined(DYNLOAD_CORE)
 #include "MyLoadLibrary.h"
 #define GetProcAddress MyGetProcAddress
 #define IMPORT_FUNC(name) (FARPROC)name = GetProcAddress(hPyCore, #name)
@@ -140,7 +140,7 @@ InitExports(void)
     if (!hPyCore)
         LoadPyCore();
 
-#if defined(DYNLOAD_CORE) || !defined(STANDALONE)
+#if defined(DYNLOAD_CORE) || defined(Py_BUILD_CORE)
 
     /* Non-pointer variables START */
     IMPORT_DATA(Py_OptimizeFlag);

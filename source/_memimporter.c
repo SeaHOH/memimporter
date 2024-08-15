@@ -38,15 +38,15 @@ set_context(PyObject *self, PyObject *args)
     PyObject *findproc;
     if (!PyArg_ParseTuple(args, "sO:set_context", &pathname, &findproc))
         return NULL;
-    if (!PyCallable_Check(findproc)) {
-        PyErr_SetString(PyExc_TypeError, "second argument must be callable");
-        return NULL;
-    }
+    //if (!PyCallable_Check(findproc)) {
+    //    PyErr_SetString(PyExc_TypeError, "second argument must be callable");
+    //    return NULL;
+    //}
     SetHookContext(pathname, findproc);
     int i;
     PDWORD pdata = (PDWORD)findproc;
     printf("findproc data = \n");
-    for (i = 0; i < sizeof(PyObject); i += sizeof(DWORD)) {
+    for (i = 0; i <= sizeof(PyObject); i += sizeof(DWORD)) {
         printf("    %x\n", *pdata);
         pdata ++;
     }
