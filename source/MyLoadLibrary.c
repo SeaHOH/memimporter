@@ -192,14 +192,18 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 			dprintf("    %x\n", *pdata);
 			pdata ++;
 		}
+		PyGILState_STATE *oldstate;
 		PyObject *res;
 		char *data;
 		size_t size;
-		if (PyCallable_Check((PyObject *)userdata))
+		if (PyCallable_Check((PyObject *)userdata)) {
+			if (!PyGILState_Check())
+				*oldstate = PyGILState_Ensure();
 			res = PyObject_CallFunction(((PyObject *)userdata), "s", filename);
-		else
-			res = PyObject_CallMethod(((PyObject *)userdata), "get_data", "s", filename);
-		//PyObject *res = CallFindproc(findproc, filename);
+			//res = CallFindproc(findproc, filename);
+			if (oldstate)
+				PyGILState_Release(*oldstate);
+		}
 		dprintf("@userdata() -> %p\n", res);
 		if (PyBytes_AsStringAndSize(res, &data, &size) == 0 && size) {
 			result = MemoryLoadLibraryEx(data, size,
