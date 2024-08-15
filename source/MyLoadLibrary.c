@@ -117,6 +117,11 @@ static LIST *_AddMemoryModule(LPCSTR name, HCUSTOMMODULE module)
 	libraries = entry;
 	dprintf("_AddMemoryModule(%s, %p) -> %p[%d]\n",
 		name, module, entry, entry->refcount);
+	if (module->userdata) {
+		PyGILState_STATE oldstate = PyGILState_Ensure();
+		Py_INCREF((PyObject *)module->userdata);
+		PyGILState_Release(oldstate);
+	}
 	return entry;
 }
 
@@ -274,6 +279,11 @@ BOOL MyFreeLibrary(HMODULE module)
 	if (lib) {
 		if (--lib->refcount == 0) {
 			MemoryFreeLibrary(module);
+			if (module->userdata) {
+				PyGILState_STATE oldstate = PyGILState_Ensure();
+				Py_DECREF((PyObject *)module->userdata);
+				PyGILState_Release(oldstate);
+			}
 			_DelListEntry(lib);
 		}
 		return TRUE;
@@ -294,12 +304,15 @@ BOOL WINAPI MyGetModuleHandleExW(DWORD flags, LPCWSTR modname, HMODULE *pmodule)
 
 FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 {
-	FARPROC proc;
-	//dprintf("MyGetProcAddress(%p, %s)", module, procname);
-	LIST *lib = _FindMemoryModule(NULL, module);
-	if (lib)
-		proc = MemoryGetProcAddress(lib->module, procname);
+	static HMODULE last_module;
+	static int last_getprocaddress;
+	if (module == last_module && last_getprocaddress
+			|| _FindMemoryModule(NULL, module)) {
+		last_getprocaddress = 1;
+		proc = MemoryGetProcAddress(module, procname);
+	}
 	else {
+		last_getprocaddress = 0;
 		SetLastError(0);
 		proc = GetProcAddress(module, procname);
 		if (proc == (FARPROC)&GetModuleHandleExW)
