@@ -46,9 +46,9 @@ BOOL WINAPI MyGetModuleHandleExW(DWORD, LPCWSTR, HMODULE *)
 typedef struct tagLIST {
 	union {
 		HCUSTOMMODULE module;
-		LPWSTR wname;
+		LPCWSTR wname;
 	};
-	LPSTR name;
+	LPCSTR name;
 	struct tagLIST *next;
 	struct tagLIST *prev;
 	union {
@@ -109,7 +109,7 @@ static LIST *_FindMemoryModule(LPCSTR name, HMODULE module)
 static LIST *_AddMemoryModule(LPCSTR name, HCUSTOMMODULE module)
 {
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
-	entry->name = _strdup(name);
+	entry->name = name;
 	entry->module = module;
 	entry->next = libraries;
 	entry->prev = NULL;
@@ -131,7 +131,6 @@ static void _DelListEntry(LIST *entry)
 		entry->prev->next = entry->next;
 	if (entry->next)
 		entry->next->prev = entry->prev;
-	free(entry->name);
 	free(entry);
 	entry = NULL;
 }
@@ -320,12 +319,12 @@ void SetHookContext(LPCSTR name, PyObject *userdata)
 	PyObject *wname = PyUnicode_FromString(name);
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
 	entry->wname = PyUnicode_AsWideCharString(wname, NULL);
-	entry->name = _strdup(name);
+	entry->name = name;
 	entry->next = hookcontexts;
 	entry->prev = NULL;
 	entry->userdata = (void *)userdata;
 	hookcontexts = entry;
-	//Py_INCREF(userdata);
+	Py_INCREF(userdata);
 	Py_DECREF(wname);
 	dprintf("SetHookContext(%s, %p) -> NULL\n", name, userdata);
 }
@@ -352,8 +351,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
-		//free(context->wname);
-		//Py_DECREF((PyObject *)(context->userdata));
+		Py_DECREF((PyObject *)(context->userdata));
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
