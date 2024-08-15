@@ -192,23 +192,23 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 			dprintf("    %x\n", *pdata);
 			pdata ++;
 		}
-		PyGILState_STATE oldstate;
-		PyObject *res;
 		char *data;
 		size_t size;
 		if (PyCallable_Check((PyObject *)userdata)) {
-			oldstate = PyGILState_Ensure();
-			res = PyObject_CallFunction(((PyObject *)userdata), "s", filename);
+			PyGILState_STATE oldstate = PyGILState_Ensure();
+			PyObject *res = PyObject_CallFunction(((PyObject *)userdata), "s", filename);
 			//res = CallFindproc(findproc, filename);
+			dprintf("@userdata() -> %p\n", res);
+			if (PyBytes_AsStringAndSize(res, &data, &size) < 0)
+				PyErr_Clear();
+			Py_XDECREF(res);
 			PyGILState_Release(oldstate);
 		}
-		dprintf("@userdata() -> %p\n", res);
-		if (PyBytes_AsStringAndSize(res, &data, &size) == 0 && size) {
+		if (size) {
 			result = MemoryLoadLibraryEx(data, size,
 				MemoryDefaultAlloc, MemoryDefaultFree,
 				_LoadLibrary, _GetProcAddress, _FreeLibrary,
 				userdata);
-			Py_DECREF(res);
 			if (result) {
 				lib = _AddMemoryModule(filename, result);
 				POP();
@@ -219,11 +219,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 				dprintf("_LoadLibrary(%s, %p) failed with error %d\n",
 					filename, userdata, GetLastError());
 			}
-		} else {
-			PyErr_Clear();
 		}
-		if (res)
-			Py_DECREF(res);
 	}
 	SetLastError(0);
 	result = (HCUSTOMMODULE)LoadLibraryA(filename);
