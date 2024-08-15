@@ -209,6 +209,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 			PyGILState_Release(oldstate);
 		}
 		if (size) {
+			dprintf("MemoryLoadLibraryEx(data, %d)", size);
 			result = MemoryLoadLibraryEx(data, size,
 				MemoryDefaultAlloc, MemoryDefaultFree,
 				_LoadLibrary, _GetProcAddress, _FreeLibrary,
