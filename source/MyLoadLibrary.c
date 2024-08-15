@@ -117,9 +117,10 @@ static LIST *_AddMemoryModule(LPCSTR name, HCUSTOMMODULE module)
 	libraries = entry;
 	dprintf("_AddMemoryModule(%s, %p) -> %p[%d]\n",
 		name, module, entry, entry->refcount);
-	if (module->userdata) {
+	void *userdata = ((PMEMORYMODULE)module)->userdata;
+	if (userdata) {
 		PyGILState_STATE oldstate = PyGILState_Ensure();
-		Py_INCREF((PyObject *)module->userdata);
+		Py_INCREF((PyObject *)userdata);
 		PyGILState_Release(oldstate);
 	}
 	return entry;
@@ -278,12 +279,13 @@ BOOL MyFreeLibrary(HMODULE module)
 	LIST *lib = _FindMemoryModule(NULL, module);
 	if (lib) {
 		if (--lib->refcount == 0) {
-			MemoryFreeLibrary(module);
-			if (module->userdata) {
+			void *userdata = ((PMEMORYMODULE)module)->userdata;
+			if (userdata) {
 				PyGILState_STATE oldstate = PyGILState_Ensure();
-				Py_DECREF((PyObject *)module->userdata);
+				Py_DECREF((PyObject *)userdata);
 				PyGILState_Release(oldstate);
 			}
+			MemoryFreeLibrary(module);
 			_DelListEntry(lib);
 		}
 		return TRUE;
