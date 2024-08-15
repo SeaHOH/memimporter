@@ -301,8 +301,8 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 	else {
 		SetLastError(0);
 		proc = GetProcAddress(module, procname);
-		if (proc == (FARPROC)&GetModuleHandleExW)
-			proc = (FARPROC)MyGetModuleHandleExW;
+		//if (proc == (FARPROC)&GetModuleHandleExW)
+		//	proc = (FARPROC)MyGetModuleHandleExW;
 	}
 	return proc;
 }
@@ -351,8 +351,8 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
-		//free(context->wname);
-		//Py_DECREF((PyObject *)context->userdata);
+		free(context->wname);
+		Py_DECREF((PyObject *)(context->userdata));
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
@@ -360,7 +360,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 	}
 
 	hmodule = LoadLibraryExW(lpLibFileName, hFile, dwFlags);
-	dprintf("LoadLibraryExW(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
+	dprintf("LoadLibraryExW(%ls, %d, %x) -> %p\n", lpLibFileName, hFile, dwFlags, hmodule);
 
 finally:
 	_DelListEntry(context);
