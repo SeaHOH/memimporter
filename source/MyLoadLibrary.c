@@ -308,6 +308,8 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 {
 	static HMODULE last_module;
 	static int last_getprocaddress;
+	FARPROC proc;
+
 	if (module == last_module && last_getprocaddress
 			|| _FindMemoryModule(NULL, module)) {
 		last_getprocaddress = 1;
