@@ -319,7 +319,7 @@ void SetHookContext(LPCSTR name, PyObject *userdata)
 	dprintf("SetHookContext(%s, %p)\n", name, userdata);
 	PyObject *wname = PyUnicode_FromString(name);
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
-	entry->wname = _wcsdup(PyUnicode_AsWideCharString(wname, NULL));
+	entry->wname = PyUnicode_AsWideCharString(wname, NULL);
 	entry->name = _strdup(name);
 	entry->next = hookcontexts;
 	entry->prev = NULL;
@@ -352,7 +352,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
-		free(context->wname);
+		//free(context->wname);
 		//Py_DECREF((PyObject *)(context->userdata));
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
@@ -364,7 +364,7 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 	dprintf("LoadLibraryExW(%ls, %d, %x) -> %p\n", lpLibFileName, hFile, dwFlags, hmodule);
 
 finally:
-	_DelListEntry(context);
+	//_DelListEntry(context);
 	return hmodule;
 }
 
