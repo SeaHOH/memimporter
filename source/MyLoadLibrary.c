@@ -316,10 +316,8 @@ extern WORD Py_Minor_Version;
 void SetHookContext(LPCSTR name, PyObject *userdata)
 {
 	dprintf("SetHookContext(%s, %p)\n", name, userdata);
-	wchar_t wname[513];
-	swprintf(wname, 512, L"%s", name);
 	LIST *entry = (LIST *)malloc(sizeof(LIST));
-	entry->wname = wname;
+	entry->wname = NULL;
 	entry->name = name;
 	entry->next = hookcontexts;
 	entry->prev = NULL;
@@ -347,7 +345,9 @@ HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwF
 {
 	dprintf("LoadLibraryExWHook(%ls, %d, %x)\n", lpLibFileName, hFile, dwFlags);
 	HMODULE hmodule = NULL;
-	LIST *context = _FindHookContext(NULL, lpLibFileName);
+	char name[513];
+	swprintf(name, 512, L"%s", lpLibFileName);
+	LIST *context = _FindHookContext(name, NULL);
 
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
