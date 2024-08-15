@@ -193,7 +193,7 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 			pdata ++;
 		}
 		char *data;
-		size_t size;
+		size_t size = 0;
 		if (PyCallable_Check((PyObject *)userdata)) {
 			PyGILState_STATE oldstate = PyGILState_Ensure();
 			PyObject *res = PyObject_CallFunction(((PyObject *)userdata), "s", filename);
