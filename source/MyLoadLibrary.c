@@ -176,6 +176,11 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 			filename, userdata, lib->name, lib->refcount);
 		return lib->module;
 	}
+	if (result = GetModuleHandleA(filename)) {
+		POP();
+		dprintf("GetModuleHandleA(%s) -> %p\n\n", filename, result);
+		return result;
+	}
 	if (userdata) {
 		dprintf("@userdata\n");
 		//PyObject *findproc = (PyObject *)userdata;
