@@ -294,7 +294,7 @@ BOOL WINAPI MyGetModuleHandleExW(DWORD flags, LPCWSTR modname, HMODULE *pmodule)
 FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 {
 	FARPROC proc;
-	dprintf("MyGetProcAddress(%p, %s)", module, procname);
+	//dprintf("MyGetProcAddress(%p, %s)", module, procname);
 	LIST *lib = _FindMemoryModule(NULL, module);
 	if (lib)
 		proc = MemoryGetProcAddress(lib->module, procname);
