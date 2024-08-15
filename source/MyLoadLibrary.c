@@ -190,13 +190,13 @@ static HCUSTOMMODULE _LoadLibrary(LPCSTR filename, void *userdata)
 		//
 		// So we implement a special CallFindproc function
 		// which encapsulates the dance we have to do.
-		int i;
-		PDWORD pdata = (PDWORD)userdata;
-		dprintf("@userdata data = \n");
-		for (i = 0; i <= sizeof(PyObject); i += sizeof(DWORD)) {
-			dprintf("    %x\n", *pdata);
-			pdata ++;
-		}
+		//int i;
+		//PDWORD pdata = (PDWORD)userdata;
+		//dprintf("@userdata data = \n");
+		//for (i = 0; i <= sizeof(PyObject); i += sizeof(DWORD)) {
+		//	dprintf("    %x\n", *pdata);
+		//	pdata ++;
+		//}
 		char *data;
 		size_t size = 0;
 		if (PyCallable_Check((PyObject *)userdata)) {
@@ -346,13 +346,13 @@ static LIST *_FindHookContext(LPCSTR name, LPCWSTR wname)
 HMODULE WINAPI LoadLibraryExWHook(LPCWSTR lpLibFileName, HANDLE hFile, DWORD dwFlags)
 {
 	dprintf("LoadLibraryExWHook(%ls, %d, %x)\n", lpLibFileName, hFile, dwFlags);
-	HMODULE hmodule;
+	HMODULE hmodule = NULL;
 	LIST *context = _FindHookContext(NULL, lpLibFileName);
 
 	if (context) {
 		hmodule = _LoadLibrary(context->name, context->userdata);
-		free(context->wname);
-		Py_DECREF((PyObject *)context->userdata);
+		//free(context->wname);
+		//Py_DECREF((PyObject *)context->userdata);
 		if (hmodule) {
 			dprintf("LoadLibraryExWHook(%ls, %d, %x) -> %d\n", lpLibFileName, hFile, dwFlags, hmodule);
 			goto finally;
